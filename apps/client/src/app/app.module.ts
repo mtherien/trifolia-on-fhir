@@ -75,7 +75,7 @@ import { PackageListComponent } from './implementation-guide-wrapper/package-lis
 import { ResourceGuard } from './guards/resource.guard';
 import { ElementDefinitionConstraintComponent } from './modals/element-definition-constraint/element-definition-constraint.component';
 import { UpdateDiffComponent } from './import/update-diff/update-diff.component';
-import { InlineDiffComponent } from 'ngx-diff';
+import { UnifiedDiffComponent } from 'ngx-diff';
 import { QueueComponent } from './manage/queue/queue.component';
 import { ExamplesComponent } from './examples/examples.component';
 import { BulkEditComponent } from './bulk-edit/bulk-edit.component';
@@ -175,7 +175,7 @@ const appRoutes: Routes = [
   { path: 'projects/implementation-guide/open', component: ImplementationGuidesComponent },
   { path: 'projects/:implementationGuideId/implementation-guide/view', component: ImplementationGuideViewComponent, runGuardsAndResolvers: 'always' },
   { path: 'projects/:implementationGuideId/code-system', component: CodesystemsComponent },
-  { path: 'projects/:implementationGuideId/code-system/:id', component: CodesystemComponent, runGuardsAndResolvers: 'always' },
+  { path: 'projects/:implementationGuideId/code-system/:id', component: CodesystemComponent, runGuardsAndResolvers: 'always', canDeactivate: [ResourceGuard] },
   { path: 'projects/:implementationGuideId/page', component: PagesComponent },
   { path: 'projects/:implementationGuideId/page/:id', component: PageComponent, runGuardsAndResolvers: 'always' },
   { path: 'projects/:implementationGuideId/page/new', component: PageComponent},
@@ -382,7 +382,7 @@ const authModuleConfig: OAuthModuleConfig = {
     SharedUiModule,
     FhirEditModule,
     ModalsModule,
-    InlineDiffComponent
+    UnifiedDiffComponent
   ],
   providers: [
     CookieService,
