@@ -4,47 +4,27 @@ import {HttpService} from '@nestjs/axios';
 import {Injectable} from '@nestjs/common';
 import {TofLogger} from './tof-logger';
 import {ConfigService} from './config.service';
-import jwksClient from 'jwks-rsa';
+import {createRemoteJWKSet, jwtVerify} from 'jose';
 import {UsersService} from './users/users.service';
 import {ITofUser} from '@trifolia-fhir/tof-lib';
-
-const jwt = require('jsonwebtoken');
 
 @Injectable()
 export class HttpStrategy extends PassportStrategy(Strategy) {
   private readonly logger = new TofLogger(HttpStrategy.name);
-  private readonly jwksClient: jwksClient.JwksClient;
+  private jwks: ReturnType<typeof createRemoteJWKSet>;
 
   constructor(private httpService: HttpService, private configService: ConfigService, private userService: UsersService) {
     super();
-
-    this.jwksClient = jwksClient({
-      jwksUri: this.configService.auth.jwksUri
-    });
   }
 
   async verify(token: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const getKey = (header, callback) => {
-        this.jwksClient.getSigningKey(header.kid, (err, key: any) => {
-          if (err) {
-            callback(err);
-            return;
-          }
+    // Created on first use so that a missing jwksUri fails the request rather than server startup
+    if (!this.jwks) {
+      this.jwks = createRemoteJWKSet(new URL(this.configService.auth.jwksUri));
+    }
 
-          const signingKey = key.publicKey || key.rsaPublicKey;
-          callback(null, signingKey);
-        });
-      }
-
-      jwt.verify(token, getKey, (err, decoded) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(decoded);
-        }
-      });
-    });
+    const { payload } = await jwtVerify(token, this.jwks);
+    return payload;
   }
 
   async validate(token: string) {
