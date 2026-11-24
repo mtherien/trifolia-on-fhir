@@ -42,7 +42,9 @@ Local MongoDB: `docker-compose up mongodb`. The full stack runs with `docker-com
 
 ## Runtime requirements
 
-Run the server on Node 20, the version the Docker image uses. Builds work on newer Node, but the server crashes at startup on Node 23+ because dependencies use removed `util`/`buffer` APIs (`jsonwebtoken` → `buffer-equal-constant-time` uses `SlowBuffer`). Without a Node 20 install, `npx -y node@20 main.js` works.
+The app targets Node 26 (the Dockerfiles use `node:26-alpine`) and also runs on Node 20. Avoid adding dependencies that use Node APIs removed in Node 23+, such as `SlowBuffer` or the `util.isXxx` helpers. This is why JWT verification uses `jose` instead of `jsonwebtoken`. `@types/node` stays on an older major because Angular 17 pins TypeScript below 5.5, and newer `@types/node` needs TypeScript 5.6+.
+
+The Jest suites have failures on both Node 20 and Node 26 (17 of 24 server tests, all 5 client specs, and `constraint-manager.spec.ts` in tof-lib). Compare against that baseline rather than expecting a green run.
 
 Every API endpoint requires a JWT from an OIDC provider (`auth.jwksUri`). There is no local or anonymous login mode.
 

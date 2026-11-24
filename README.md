@@ -2,7 +2,7 @@
 
 ## Requirements
 
-* [Node.js](https://nodejs.org/) 20 (the version used by the Docker image). The applications build on newer versions, but the server fails at startup on Node 23+ because some dependencies use Node APIs that have been removed.
+* [Node.js](https://nodejs.org/) 26 (the version used by the Docker image). Node 20 also works.
 * [MongoDB](https://www.mongodb.com/) - all projects, resources, users and history are stored in MongoDB
 * An OpenID Connect provider (for example Keycloak or Auth0) - every API request requires a signed access token. See "Authentication" below.
 * [Java](https://www.java.com/en/download/) - to run the IG Publisher

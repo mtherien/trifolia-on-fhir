@@ -13,3 +13,4 @@ dist/
 .angular
 .vscode
 tmp/
+apps/server/src/config/local*.json

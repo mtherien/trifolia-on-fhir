@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build-ToF
+FROM node:26-alpine AS build
 
 # Python and G++ are required for some of the node devDependencies
 # Java is required for Trifolia-on-FHIR to "Publish" implementation guides
@@ -29,10 +29,23 @@ RUN node --max_old_space_size=4096 node_modules/nx/bin/nx build tools --configur
 
 RUN npm prune --production
 
-FROM lantanagroup/tof-base:latest
+FROM node:26-alpine
 
-COPY --from=build-ToF /build/dist/. /ToF/
-COPY --from=build-ToF /build/node_modules/. /ToF/node_modules/
+# Ruby and Jekyll are required by the FHIR IG Publisher to generate HTML.
+# Java is used to execute the FHIR IG Publisher.
+RUN apk update && apk --update --no-cache add ruby-full ruby-dev build-base openjdk11-jre
+# Install fonts that are used by ig publisher. Without these, ig publisher throws a bunch of exceptions
+RUN apk add --no-cache fontconfig ttf-dejavu
+RUN gem install ffi -v 1.15.5
+RUN gem install sassc -v 2.4.0 -- --disable-march-tune-native
+RUN gem install rouge -v 3.30.0
+RUN gem install jekyll -v 3.9.3 --no-document
+RUN gem install kramdown-parser-gfm -v 1.1.0 --no-document
+RUN gem install bundler --no-document
+RUN jekyll -v
+
+COPY --from=build /build/dist/. /ToF/
+COPY --from=build /build/node_modules/. /ToF/node_modules/
 
 VOLUME /ToF/apps/server/logs
 VOLUME /ToF/apps/server/igs
